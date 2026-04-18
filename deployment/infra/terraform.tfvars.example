@@ -1,0 +1,5 @@
+# AWS region (default: us-east-1)
+# aws_region = "us-east-1"
+
+# S3 bucket for bus stop camera images (must be globally unique — change this)
+s3_bucket_images = "your-busstop-images"
