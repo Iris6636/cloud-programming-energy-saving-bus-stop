@@ -7,11 +7,11 @@
 
 ## 課程背景｜Course Background
 
-本專案為國立清華大學 113-2「雲端程式設計」課程黑客松小專案。
+本 repo 為 113-2 國立清華大學雲端程式設計課程第 6 組黑客松小專案。功能相對簡單，因為黑客松的目標是讓學生在短時間內從硬體感測器到雲端服務，走完一次完整的 IoT 開發流程。
 
-課程目標是讓學生在短時間內，從硬體感測器到雲端服務，走完一次完整的 IoT 開發流程——包含裝置端程式、MQTT 通訊、事件驅動的 Lambda 串接，以及基礎設施即程式碼（IaC）部署。
+課程結束後補全了 Terraform IaC，使整個部署環境可在任意 AWS 帳號上重現。
 
-This is a hackathon mini-project from the NTHU 113-2 *Cloud Programming* course. The goal is to walk through a complete IoT development cycle — from physical sensors to cloud infrastructure — within a constrained timeframe.
+This repo is a hackathon mini-project from Group 6 of the NTHU 113-2 *Cloud Programming* course. The scope is intentionally simple — the goal was to complete a full IoT development cycle end-to-end within a short timeframe. Terraform IaC was added post-course to make the deployment fully reproducible on any AWS account.
 
 ---
 
