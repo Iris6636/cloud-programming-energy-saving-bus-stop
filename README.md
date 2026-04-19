@@ -1,26 +1,14 @@
 # 節能智慧公車站牌系統｜Energy-Saving Smart Bus Stop
 
-> 有人才亮，無人即暗——用 IoT + 雲端實現感測驅動的節能顯示系統
-> Presence-driven smart display: lights up only when someone's there, powered by IoT and AWS
+有人才亮，無人即暗——偵測到人流時自動拍照上傳，結合 IoT 感測與 AWS 雲端實現節能顯示系統。
 
----
+Presence-driven smart display: automatically captures and uploads photos when people are detected, powered by IoT sensors and AWS cloud.
 
-## 課程背景｜Course Background
+本 repo 為 113-2 國立清華大學雲端程式設計課程第 6 組黑客松小專案。課程結束後補全 Terraform IaC，使部署環境可在任意 AWS 帳號重現。
 
-本 repo 為 113-2 國立清華大學雲端程式設計課程第 6 組黑客松小專案。功能相對簡單，因為黑客松的目標是讓學生在短時間內從硬體感測器到雲端服務，走完一次完整的 IoT 開發流程。
+This repo is a hackathon mini-project from Group 6 of the NTHU 113-2 *Cloud Programming* course. Terraform IaC was added post-course to make the deployment fully reproducible on any AWS account.
 
-課程結束後補全了 Terraform IaC，使整個部署環境可在任意 AWS 帳號上重現。
-
-This repo is a hackathon mini-project from Group 6 of the NTHU 113-2 *Cloud Programming* course. The scope is intentionally simple — the goal was to complete a full IoT development cycle end-to-end within a short timeframe. Terraform IaC was added post-course to make the deployment fully reproducible on any AWS account.
-
----
-
-## 簡報 / Demo｜Slides & Demo
-
-| 項目 | 連結 |
-|------|------|
-| 課程簡報 | [Google Drive](https://drive.google.com/file/d/19yguSur3Kxkcy-BVKRJPZeOC-JerOW-N/view?usp=sharing) |
-| Talk 影片（含 Demo）| [Google Drive](https://drive.google.com/file/d/1zG8NVtIvkOJWsTG3smMxXWGzzYL0mKia/view?usp=sharing) |
+📑 [簡報 Slides](https://drive.google.com/file/d/19yguSur3Kxkcy-BVKRJPZeOC-JerOW-N/view?usp=sharing) ・ 🎥 [Talk 影片 Video（含 Demo）](https://drive.google.com/file/d/1zG8NVtIvkOJWsTG3smMxXWGzzYL0mKia/view?usp=sharing)
 
 ---
 
