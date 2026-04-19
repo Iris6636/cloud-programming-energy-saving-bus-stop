@@ -8,7 +8,7 @@ Presence-driven smart display: automatically captures and uploads photos when pe
 
 This repo is a hackathon mini-project from Group 6 of the NTHU 113-2 *Cloud Programming* course. Terraform IaC was added post-course to make the deployment fully reproducible on any AWS account.
 
-📑 [簡報 Slides](https://drive.google.com/file/d/19yguSur3Kxkcy-BVKRJPZeOC-JerOW-N/view?usp=sharing) ・ 🎥 [Talk 影片 Video（含 Demo）](https://drive.google.com/file/d/1zG8NVtIvkOJWsTG3smMxXWGzzYL0mKia/view?usp=sharing)
+📑 [簡報 Slides](https://drive.google.com/file/d/19yguSur3Kxkcy-BVKRJPZeOC-JerOW-N/view?usp=sharing) ・ 🎥 [專案介紹 + Demo 影片](https://drive.google.com/file/d/1zG8NVtIvkOJWsTG3smMxXWGzzYL0mKia/view?usp=sharing)
 
 ---
 
