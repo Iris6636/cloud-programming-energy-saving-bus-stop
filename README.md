@@ -19,8 +19,8 @@ This repo is a hackathon mini-project from Group 6 of the NTHU 113-2 *Cloud Prog
 
 | 項目 | 連結 |
 |------|------|
-| 課程簡報 | *(待補)* |
-| Demo 影片 | *(待補)* |
+| 課程簡報 | [Google Drive](https://drive.google.com/file/d/19yguSur3Kxkcy-BVKRJPZeOC-JerOW-N/view?usp=sharing) |
+| Talk 影片（含 Demo）| [Google Drive](https://drive.google.com/file/d/1zG8NVtIvkOJWsTG3smMxXWGzzYL0mKia/view?usp=sharing) |
 
 ---
 
