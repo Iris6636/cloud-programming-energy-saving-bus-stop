@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1"  # 可改成你實際部署區域
+  region = var.aws_region
 }
 
 terraform {

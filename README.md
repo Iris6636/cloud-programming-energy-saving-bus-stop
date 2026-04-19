@@ -1,144 +1,152 @@
-# cloud-programming-energy-saving-bus-stop
-節能公車站牌系統，透過 IoT 感測與 AWS 雲端整合，根據人流與光照智慧調整看板顯示狀態並模擬太陽能儲電。 A smart bus stop system combining IoT sensors and AWS services, designed to display information only when people are nearby, and simulate solar energy storage via light detection.
+# 節能智慧公車站牌系統｜Energy-Saving Smart Bus Stop
 
-# 節能公車站牌系統｜Energy-Saving Smart Bus Stop
+有人才亮，無人即暗——偵測到人流時自動拍照上傳，結合 IoT 感測與 AWS 雲端實現節能顯示系統。
 
-> 有人才亮燈，感測也節能！  
-> Energy-efficient smart signage triggered by real-world presence and sunlight.
+Presence-driven smart display: automatically captures and uploads photos when people are detected, powered by IoT sensors and AWS cloud.
 
+本 repo 為 113-2 國立清華大學雲端程式設計課程第 6 組黑客松小專案。課程結束後補全 Terraform IaC，使部署環境可在任意 AWS 帳號重現。
 
----
+This repo is a hackathon mini-project from Group 6 of the NTHU 113-2 *Cloud Programming* course. Terraform IaC was added post-course to make the deployment fully reproducible on any AWS account.
 
-## 📘 專案簡介｜Project Introduction
-
-節能公車站牌是一款結合 IoT 感測與 AWS 雲端服務的智慧看板系統。透過紅外線與光敏電阻感測器偵測人流與光照，自動控制 OLED 顯示開關與亮度，並模擬太陽能儲電。後台管理員可透過網頁即時查看電量與運作狀態。
-
-This is a smart signage system that only activates when people approach. It integrates IoT sensors and AWS cloud services to dynamically adjust display brightness and simulate solar energy storage. A backend dashboard provides real-time monitoring.
+📑 [簡報 Slides](https://drive.google.com/file/d/19yguSur3Kxkcy-BVKRJPZeOC-JerOW-N/view?usp=sharing) ・ 🎥 [專案介紹 + Demo 影片](https://drive.google.com/file/d/1zG8NVtIvkOJWsTG3smMxXWGzzYL0mKia/view?usp=sharing)
 
 ---
 
-## 🧱 系統架構圖｜System Architecture
+## 系統架構圖｜System Architecture
 
-![System Diagram](architecture/system_architecture.png)
-
----
-
-## 🧑‍💻 系統流程｜System Workflow
-
-1. 每 15 秒感測一次光照與人流，並將資料上傳 AWS  
-   Sensing is done every 15 seconds and sent to AWS.
-2. 若有人靠近，開啟 OLED 並顯示資訊  
-   OLED lights up with info when people are detected.
-3. 根據光強調整螢幕亮度並模擬電量變化  
-   Light intensity affects brightness & battery simulation.
-4. 管理員可透過網站查看即時狀態  
-   Admin can check status via frontend.
----
-
-## 🔧 使用技術｜Tech Stack
-
-### 🎯 AWS 雲端服務｜AWS Services
-- IoT Core（設備通訊 / Device Communication）
-- Lambda（邏輯處理 / Business Logic）
-- DynamoDB（狀態儲存 / State Storage）
-- S3（影像儲存 / Image Upload）
-- API Gateway（前後端連接 / API Access）
-
-
-### 📦 IoT 裝置與硬體｜IoT & Hardware
-- Raspberry Pi 3 / 4
-- V2 Camera 模組
-- 震動感測器 SW-420
-- 電磁閥 DS-0420S
-
-### 💻 前端技術｜Frontend
-- HTML / CSS / JavaScript
-- S3 Static Hosting + Cognito Login
-
----
-
-## 🚀 如何使用本專案｜Getting Started
-
-### ✅ 下載專案｜Clone the Repo
-
-```bash
-git clone https://github.com/your-account/smart-washer-project.git
-cd smart-washer-project
+```
+┌──────────────────────────────────────────────┐
+│                Raspberry Pi                   │
+│                                               │
+│  PIR Sensor ──► 偵測人流                      │
+│  Camera     ──► 拍照                          │
+│  BH1750     ──► 偵測光照 → 調整 OLED 亮度     │
+│  OLED       ──► 顯示資訊                      │
+│                                               │
+│  iot/main.py（每 15 秒更新 Shadow）            │
+└───────────────┬──────────────────────────────┘
+                │ MQTT over TLS (port 8883)
+                ▼
+┌──────────────────────────────────────────────┐
+│              AWS IoT Core                     │
+│                                               │
+│  Thing Shadow：                               │
+│    presence / light / electricity / oled      │
+│                                               │
+│  Topic Rule 1：presence false → true          │
+│    └─► Lambda: busstop-PresenceTov2           │
+│          └─► Publish MQTT: take_picture       │
+│                └─► Pi 收到指令、拍照           │
+│                      └─► MQTT: device/camera/image
+│                                               │
+│  Topic Rule 2：device/camera/image            │
+│    └─► Lambda: busstop-v2Base64toS3           │
+│          └─► 解碼 base64 → S3 上傳            │
+└──────────────────────────────────────────────┘
+                │
+                ▼
+┌──────────────────────────────────────────────┐
+│              Amazon S3                        │
+│  photos/NTHU-{timestamp}.jpg                  │
+└──────────────────────────────────────────────┘
 ```
 
-或下載 ZIP → 解壓縮  
-Or download the ZIP and extract it.
+---
+
+## 系統亮點｜Highlights
+
+### 1. Shadow 狀態轉換觸發，而非輪詢
+
+IoT Rule 監聽的是 Shadow update document，只在 `presence` 從 `false` 變 `true` 的瞬間觸發 Lambda，而不是每次上報都觸發。這樣即使 Pi 每 15 秒更新一次，也不會在有人持續停留時反覆發送拍照指令。
+
+### 2. 雙跳 MQTT 拍照指令鏈
+
+「偵測到人」到「照片存進 S3」中間有一段雙向 MQTT：
+Lambda 先 publish 指令給 Pi → Pi 拍照 → Pi publish 圖片回雲端 → Lambda 上傳 S3。
+這個設計讓相機控制邏輯留在裝置端（減少傳輸量），雲端只負責儲存。
+
+### 3. 邊緣運算節能邏輯
+
+OLED 亮度調整完全在 Pi 本地完成（BH1750 光照 → lux mapping → I2C 寫入亮度值），不依賴雲端回路。電量模擬也在本地計算後才上報 Shadow，減少不必要的雲端呼叫。
+
+### 4. 完整 IaC，一鍵重現
+
+所有 AWS 資源（IoT Thing、Topic Rules、Lambda、S3、IAM）由 Terraform 管理，`terraform apply` 即可在新帳號重建完整環境，不需要手動在 Console 點選。
 
 ---
 
-### ✅ 執行 IoT 裝置程式｜Run IoT Device Code
+## 技術選型｜Tech Stack
+
+### AWS 服務
+
+| 服務 | 用途 | 選用原因 |
+|------|------|---------|
+| **AWS IoT Core** | 裝置 MQTT 通訊、Thing Shadow 狀態管理 | 原生支援 Shadow state change 事件觸發，不需自建 MQTT broker |
+| **AWS Lambda** | 發送拍照指令、解碼圖片上傳 S3 | Serverless，無需管理伺服器；事件驅動，只在觸發時計費 |
+| **Amazon S3** | 儲存拍攝的站牌照片 | 低成本持久儲存；可直接對接 Lambda |
+| **AWS IAM** | Lambda 執行角色權限控管 | 最小權限原則，只開放必要的 iot:Publish 與 s3:PutObject |
+| **Terraform** | 基礎設施即程式碼 | 可重複部署，版本控制，遷移帳號不需重新手動設定 |
+
+### 裝置端
+
+| 元件 | 規格 | 用途 |
+|------|------|------|
+| Raspberry Pi | 3 / 4 | 主控制器 |
+| PIR Sensor | HC-SR501，GPIO 26 | 人流偵測 |
+| Camera Module | Picamera2 V2，640×480 | 拍攝站牌畫面 |
+| OLED Display | SSD1306，128×64，I2C 0x3C | 顯示資訊 |
+| Light Sensor | BH1750，I2C 0x23 | 偵測環境光照 |
+
+---
+
+## 快速開始｜Quick Start
 
 ```bash
-cd iot/
-python3 main.py
+git clone https://github.com/Iris6636/cloud-programming-energy-saving-bus-stop.git
+cd cloud-programming-energy-saving-bus-stop/deployment/infra
+cp terraform.tfvars.example terraform.tfvars   # 填入你的 S3 bucket 名稱
+terraform init && terraform apply
 ```
 
-請事先連接感測器與相機，並於 `config/` 中放置 IoT 憑證與設定檔。  
-Connect the sensors and camera, and ensure your AWS IoT certificates and config file are placed under `config/`.
+部署完成後，將 `terraform output iot_endpoint` 的值更新至 `iot/main.py`，並在 AWS Console 產生新憑證上傳至 Pi。
+
+完整步驟請見 **[docs/deployment_guide.md](docs/deployment_guide.md)**
 
 ---
 
-### ✅ 部署 Lambda 函式｜Deploy Lambda Functions
-
-進入 `backend/lambda_functions/`，依功能部署下列程式碼：  
-Go to `backend/lambda_functions/` and deploy the following Lambda functions:
-
-| 檔案 File | 功能 Function |
-|-----------|----------------|
-| `process_image.py` | 拍照上傳 + Rekognition 辨識<br>Upload image & recognize time |
-| `update_status.py` | 更新洗衣狀態至 DB<br>Update washer status to DB |
-| `send_notification.py` | 傳送 SNS 通知<br>Send user notification |
-| `schedule_checker.py` | 檢查預約是否過期<br>Check if reservation expired |
-
-
----
-
-## 📁 專案結構｜Project Structure
+## 專案結構｜Project Structure
 
 ```
 cloud-programming-energy-saving-bus-stop/
-├── README.md                  
-├── iot/                  
-├── backend/                    
-├── web/                        
-├── docs/         
-```
-
+├── iot/
+│   └── main.py                    # Pi 主程式：感測器、MQTT、Shadow 更新
+├── backend/
+│   └── lambda_functions/
+│       ├── PresenceTov2.py        # 偵測到人流 → 發送拍照指令
+│       └── v2Base64toS3.py        # 接收 base64 圖片 → 上傳 S3
+├── deployment/
+│   ├── infra/                     # Terraform（terraform apply 即部署）
+│   └── lambda/                    # Lambda .zip 部署包
+├── docs/
+│   └── deployment_guide.md        # 完整部署指南
+└── config/                        # IoT 憑證（請勿上傳 Git）
 ```
 
 ---
 
-## 👥 團隊成員｜Team Members
+## 相關文件｜Documentation
 
-雲端程式設計 第6組  
-Group 6 — Cloud Programming Project  
+| 文件 | 說明 |
+|------|------|
+| [docs/deployment_guide.md](docs/deployment_guide.md) | Terraform 部署、Pi 憑證設定、驗證與疑難排解 |
 
-- 吳君慧 Peggy Wu  
-- 何佳穎 Chia-Ying Ho  
-- 簡宏諭 Hung-Yu Chien  
+---
+
+## 團隊成員｜Team Members
+
+雲端程式設計 第6組｜NTHU Cloud Programming — Group 6
+
+- 吳君慧 Peggy Wu
+- 何佳穎 Chia-Ying Ho
+- 簡宏諭 Hung-Yu Chien
 - 邱子洋 Tzu-Yang Chiu
-
----
-
-
-## 🔗 相關連結
-
-- 🎥 [系統 Demo 影片](https://youtu.be/your-video-link)
-- 🖼️ [簡報 PDF 下載](docs/final_presentation.pdf)
-
----
-
-
-## 📎 注意事項｜Notes
-
-- `config/` 資料夾請手動建立並放入憑證與設定檔。  
-  請勿將 `.pem`、`.json` 等敏感檔案上傳 GitHub。  
-  → Create `config/` and place certificates locally. Do NOT upload secrets to GitHub.
-
-- 若需詳細安裝流程，請見 [`docs/setup_guide.md`](docs/setup_guide.md)  
-  For detailed setup, see `docs/setup_guide.md`

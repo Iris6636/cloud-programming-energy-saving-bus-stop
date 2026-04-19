@@ -1,3 +1,4 @@
+import os
 import boto3
 import base64
 import json
@@ -20,7 +21,7 @@ def lambda_handler(event, context):
     s3 = boto3.client("s3")
     try:
         s3.put_object(
-            Bucket="v2-pic",  
+            Bucket=os.environ['S3_BUCKET_IMAGES'],
             Key=f"photos/{filename}",
             Body=image_data,
             ContentType="image/jpeg"
