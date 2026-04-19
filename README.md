@@ -52,7 +52,7 @@ This repo is a hackathon mini-project from Group 6 of the NTHU 113-2 *Cloud Prog
 ```
 
 <p align="center">
-  <a href="docs/CP_team6_final_project_architecture.png">
+  <a href="docs/CP_team6_hackathon_project_architecture.jpg">
     <img src="docs/CP_team6_hackathon_project_architecture.jpg" alt="System Architecture" width="1000">
   </a>
 </p>
